@@ -1,39 +1,45 @@
 // test/specs/saucedemo.test.js
+// test/specs/saucedemo.test.js
 const LoginPage = require("../pageobjects/login.page");
 const InventoryPage = require("../pageobjects/inventory.page");
 
-describe("Sauce Demo Test", () => {
-  it("should login successfully", async () => {
-    await browser.url("https://www.saucedemo.com");
-    await $("#user-name").setValue("standard_user");
-    await $("#password").setValue("secret_sauce");
-    await $(".btn_action").click();
-    await $(".inventory_list").waitForDisplayed({ timeout: 10000 });
-    console.log("Logged in successfully, inventory list is displayed");
-    await expect($(".inventory_list")).toBeExisting();
-  });
+describe("Sauce Demo Test with Detailed Debugging", () => {
+  it("should login successfully with detailed debugging", async () => {
+    await LoginPage.open(); // Open login page
+    await LoginPage.login("standard_user", "secret_sauce"); // Perform login
 
-  it("should validate user is on dashboard", async () => {
-    const url = await browser.getUrl();
-    console.log("Current URL after login:", url);
-    await expect(url).toContain("inventory.html"); // Using toContain to make it more flexible
-    await $(".inventory_list").waitForDisplayed({ timeout: 10000 });
-    console.log("Inventory list is displayed on dashboard");
+    // Check current URL to verify successful login
+    const currentUrl = await browser.getUrl();
+    console.log("Current URL after login attempt:", currentUrl);
+    expect(currentUrl).toContain("inventory.html");
+
+    // Ensure the inventory list is displayed after login
+    console.log("Checking if inventory list is displayed...");
+    await InventoryPage.inventoryList.waitForDisplayed({
+      timeout: 10000,
+      timeoutMsg: "Inventory list did not display after login.",
+    });
+    console.log("Inventory list is displayed after login.");
+
+    // Ensure the inventory list is displayed after login
+    console.log("Checking if inventory list is displayed...");
+    await InventoryPage.inventoryList.waitForDisplayed({
+      timeout: 10000,
+      timeoutMsg: "Inventory list did not display after login.",
+    });
+    console.log("Inventory list is displayed after login.");
   });
 
   it("should add an item to the cart", async () => {
-    await browser.url("https://www.saucedemo.com/inventory.html");
-    const item = await $(".inventory_item_name").getText();
-    console.log("First item name:", item); // Verify item name is retrieved
-    await $(".btn_primary").click(); // Assume this is the button to add the item
-    console.log("Clicked add to cart for:", item);
+    await InventoryPage.addItemToCart(); // Panggil metode addItemToCart() dari InventoryPage
+    console.log("Clicked add to cart");
 
-    await $(".shopping_cart_link").click(); // Navigate to the cart
-    await browser.pause(5000); // Ensure the page has loaded
+    await InventoryPage.openCart(); // Panggil metode openCart() dari InventoryPage
+    await browser.pause(5000); // Jeda untuk memastikan halaman termuat
   });
 
   it("should validate item was added to cart", async () => {
-    await $(".shopping_cart_link").click();
+    await InventoryPage.openCart(); // Panggil metode openCart() dari InventoryPage
     await $(".cart_quantity").waitForDisplayed({ timeout: 10000 });
     const quantityText = await $(".cart_quantity").getText();
     console.log("Quantity in cart:", quantityText);
